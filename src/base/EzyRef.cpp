@@ -1,6 +1,7 @@
 #include "EzyRef.h"
 #include "../gc/EzyReleasePool.h"
 #include "../gc/EzyAutoReleasePool.h"
+#include "../concurrent/EzyThread.h"
 
 EZY_NAMESPACE_START_WITH(base)
 
@@ -22,7 +23,9 @@ void EzyRef::release() {
 	mRetainCount--;
 	if (mRetainCount <= 0) {
 		mMutex.unlock();
-		delete this;
+        concurrent::EzyThread::runOnMainThread([=](){
+            delete this;
+        });
 		return;
 	}
 	mMutex.unlock();
